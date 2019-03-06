@@ -8,19 +8,23 @@ python3 scheduler.py -a test.iloc test-a.iloc
 
 FOR EASE OF USE:
 
-run schedule.sh with a particular heuristic
+1)
+	run schedule.sh with a particular heuristic
 
-./schedule.sh
-heuristic: -a
+	./schedule.sh
+	heuristic: -a 
 
-This will generate the scheduled/ folder for a particular heuristic
+	This will generate the /scheduled/ folder for a particular heuristic
 
-Then, you can compare cycles and answers with
+2)
+	Then, you can compare cycles and answers with
 
-./compare.sh
-heuristic: -a
+	./compare.sh
+	heuristic: -a
 
-*troubleshooting, make sure that the shell scripts can execute
+	You can remove files from /scheduled/
+
+*troubleshooting, make sure that the shell scripts can execute, chmod +x
 
 
 

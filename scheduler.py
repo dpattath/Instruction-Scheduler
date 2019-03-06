@@ -6,14 +6,18 @@ address = set(['loadAI', 'storeAI', 'outputAI'])
 
 #dict to map instruction types to their cycle counts
 cycles = {
+	'load' : 5,
 	'loadI' : 1, 
-	'loadAI' : 5, 
+	'loadAI' : 5,
+	'loadAO' : 5,
+	'store' : 5, 
 	'storeAI' : 5,
+	'storeAO' : 5,
 	'add' : 1,
 	'sub' : 1,
 	'mult' : 3,
 	'div' : 3,
-	'outputAI' : 5
+	'outputAI' : 1
 }
 
 #object to store instructions
@@ -117,10 +121,11 @@ for i in range(len(instructions)):
 			if rightparams(inst_i) in leftparams(inst_j):
 				parents[j].add(i)
 				children[i].add(j)
-				break
 		if rightparams(inst_i) == leftparams(inst_j):
 			parents[j].add(i)
 			children[i].add(j)
+		#break when you find that this register has been reset
+		if rightparams(inst_i) == rightparams(inst_j):
 			break
 
 	#iterate through previous inst's and check for anti dependence
@@ -133,11 +138,12 @@ for i in range(len(instructions)):
 			if rightparams(inst_i) in leftparams(inst_j):
 				parents[i].add(j)
 				children[j].add(i)
-				break
 		if rightparams(inst_i) == leftparams(inst_j):
 			parents[i].add(j)
 			children[j].add(i)
-			break 
+		#break when you find that this register has been reset
+		if rightparams(inst_i) == rightparams(inst_j):
+			break
 
 	#if this item has no parents, add it to the leaves set
 	if parents[i] == set():
@@ -152,14 +158,13 @@ h = {}
 for i in range(len(instructions)):
 	h[i] = cycles[instructions[i].opcode]
 
+queue = []
 #find the final statement in this block
 for key, value in children.items():
 	if value == set():
-		root = key
-		break
+		queue.append(key)
 
-#find longest latency paths from every single node
-queue = [root]
+#update longest latency paths from every single node
 while queue != []:
 	item = queue.pop(0)
 	for parent in parents[item]:
@@ -176,6 +181,7 @@ output = []
 
 #logic for heuristics
 def choose_node(var):
+	#uses latency paths from the "h" dict
 	if var == '-a':
 		max_latency = -1
 		start = -1
@@ -184,6 +190,7 @@ def choose_node(var):
 				max_latency = h[leaf]
 				start = leaf
 		return start
+	#uses max latency instruction from the leaves
 	if var == '-b':
 		max_latency = -1
 		start = -1
@@ -193,6 +200,7 @@ def choose_node(var):
 				max_latency = count
 				start = leaf
 		return start
+	#uses min latency instruction from the leaves
 	if var == '-c':
 		min_latency = 100
 		start = -1
