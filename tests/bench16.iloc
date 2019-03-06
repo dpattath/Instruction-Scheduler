@@ -1,0 +1,2 @@
+	loadI 1024 => r0
+        loadI 42 => r1
